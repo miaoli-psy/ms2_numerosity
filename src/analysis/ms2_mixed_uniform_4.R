@@ -33,49 +33,39 @@ check_age <- data_preprocessed %>%
 check_age <- check_age %>% 
   summarise_at(vars(age), list(age = mean))
 
+# arrange data
 
-# Visualization------------------------------------------------------
-
-# TODO
-dv <- "deviation_score"
-
-# subject
-bxp <- ggboxplot(data = data_preprocessed,
-                 x = "participant",
-                 y = dv,
-                 color = "protectzonetype") +
-  facet_wrap( ~ winsize * contrast_full, nrow = 2, scale = "free_x")
-
-print(bxp)
-
-# clustering level
-bxp2 <- ggboxplot(data = data_preprocessed,
-                  x = "perceptpairs",
-                  y = dv,
-                  color = "protectzonetype") +
-  facet_wrap( ~ winsize * contrast_full, nrow = 2, scale = "free_x")
-
-print(bxp2)
-
-# numerosity
-
-bxp3 <- ggboxplot(data = data_preprocessed,
-                  x = "numerosity",
-                  y = dv,
-                  color = "protectzonetype") +
-  facet_wrap( ~ winsize * contrast_full, nrow = 2, scale = "free_x")
-
-print(bxp3)
+data_by_subject <- data_preprocessed %>%
+  group_by(numerosity,
+           participant,
+           protectzonetype,
+           winsize,
+           contrast) %>%
+  summarise(
+    deviation_score_mean = mean(deviation_score),
+    deviation_score_std = sd(deviation_score),
+    percent_change_mean = mean(percent_change),
+    percent_change_std = sd(percent_change),
+    n = n()
+  ) %>%
+  mutate(
+    deviation_socre_SEM = deviation_score_std / sqrt(n),
+    percent_change_SEM = percent_change_std / sqrt(n),
+    deviation_socre_CI = deviation_socre_SEM * qt((1 - 0.05) / 2 + .5, n -
+                                                    1),
+    percent_change_CI = percent_change_SEM * qt((1 - 0.05) / 2 + .5, n -
+                                                  1)
+  )
 
 
 # TODO
-my_data <- data_preprocessed
+my_data <- data_by_subject
 
-hist(my_data$deviation_score)
+hist(my_data$deviation_score_mean)
 
 # LMM winsize as a fixed factor-------------------------------------------
 
-my_data$deviation_score2 <- scale(my_data$deviation_score, center = TRUE, scale = TRUE)
+my_data$deviation_score2 <- scale(my_data$deviation_score_mean, center = TRUE, scale = TRUE)
 hist(my_data$deviation_score2)
 
 
@@ -111,6 +101,7 @@ anova(model.lm, model.lm2)
 
 
 emmip(model.lm, protectzonetype ~ winsize | contrast)
+emmip(model.lm, protectzonetype ~ contrast | winsize)
 
 
 # 3-way interaction
@@ -125,6 +116,8 @@ anova(model.reduced)
 anova(model.lm, model.reduced)
 
 emmip(model.lm, contrast ~ winsize)
+emmip(model.lm, protectzonetype ~ winsize)
+emmip(model.lm, protectzonetype ~ contrast)
 
 
 # 2-way interaction
@@ -163,7 +156,7 @@ summary(emms, infer = TRUE)
 
 emms2 <- emmeans(
   model.lm,
-  list(pairwise ~ protectzonetype|winsize),
+  list(pairwise ~ protectzonetype|winsize*contrast),
   adjust = "tukey"
 )
 
@@ -191,7 +184,7 @@ summary(emms3, infer = TRUE)
 
 # LMM nested numerosity as a fixed factor-------------------------------------------
 
-my_data$deviation_score2 <- scale(my_data$deviation_score, center = TRUE, scale = TRUE)
+my_data$deviation_score2 <- scale(my_data$deviation_score_mean, center = TRUE, scale = TRUE)
 hist(my_data$deviation_score2)
 
 
