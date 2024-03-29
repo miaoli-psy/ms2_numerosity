@@ -19,7 +19,7 @@ library(sjPlot)
 # prepare -----------------------------------------------------------------
 
 # set working path
-setwd("D:/SCALab/projects/numerosity_exps/src/stat_tests/")
+setwd("D:/OneDrive/projects/ms2_numerosity/src/analysis/")
 
 # read data
 data_preprocessed <- read_excel("../../data/ms2_triplets_4_data/preprocessed_triplets_4.xlsx")

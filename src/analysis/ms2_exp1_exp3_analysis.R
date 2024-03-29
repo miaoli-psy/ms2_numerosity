@@ -19,7 +19,7 @@ library(mixedpower)
 # prepare -----------------------------------------------------------------
 
 # set working path
-setwd("D:/SCALab/projects/numerosity_exps/src/stat_tests/")
+setwd("D:/OneDrive/projects/ms2_numerosity/src/analysis/")
 
 # read data
 # exp1
